@@ -1,0 +1,23 @@
+package com.dsaProject.service;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import com.dsaProject.entities.Doctor;
+import com.dsaProject.repositories.DoctorRepository;
+
+public class DoctorService {
+	public List<Doctor> findAllDoctors(DoctorRepository doctorRepository){
+		return doctorRepository.findAll();
+	}
+	public List<Doctor> findBySpecialization(DoctorRepository doctorRepository, String specilization){
+		List<Doctor> specialistDoctors = doctorRepository.findBySpecialization(specilization);
+		Collections.sort(specialistDoctors,
+				Comparator.comparing(Doctor::getExperience)
+					.thenComparing(Doctor::getRating, Comparator.reverseOrder()
+					)
+				);
+		return specialistDoctors;
+	}
+}

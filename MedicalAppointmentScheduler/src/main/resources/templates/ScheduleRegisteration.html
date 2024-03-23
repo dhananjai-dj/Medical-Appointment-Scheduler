@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Easy Visit - Doctor Details</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background-color: #343a40 !important;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .nav-item {
+            margin-left: 10px;
+        }
+
+        .container-fluid {
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+
+        .doctor-details {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .doctor-details img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .doctor-info {
+            margin-left: 20px;
+        }
+
+        .list-group-item {
+            background-color: transparent;
+            border: none;
+            font-weight: bold;
+        }
+
+        .footer {
+            background-color: #ffffff;
+            color: black;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 15px;
+            margin-top: 50px;
+        }
+
+        .footer a {
+            color: black;
+        }
+
+        .footer a:hover {
+            color:  black;
+            text-decoration: underline;
+        }
+
+        .modal-dialog {
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+<div class='container-fluid'>
+
+    <!-- Navbar -->
+    <div class="header">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/Doctors-list">
+                    <img th:src="@{images\logo.png}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top"> Easy Visit
+                </a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <form action="/Home" class="nav-link">
+                                <button type="submit" class="btn btn-primary">Home</button>
+                            </form>
+                        </li>
+                        <li class="nav-item">
+                           <form action="/MyProfile" class="nav-link">
+									<button type="submit" class="btn btn-primary">My Profile</button>
+								</form>
+                        </li>
+                        <li class="nav-item">
+                            <form action="/doctor-registration" class="nav-link">
+                                <button type="submit" class="btn btn-primary">Doctor Registration</button>
+                            </form>
+                        </li>
+                        <li class="nav-item">
+                            <form action="/about" class="nav-link">
+                                <button type="submit" class="btn btn-primary">About Us</button>
+                            </form>
+                        </li>
+                        <li class="nav-item">
+                            <form action="/contact" class="nav-link">
+                                <button type="submit" class="btn btn-primary">Contact Us</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Doctor Details -->
+    <div class="container-fluid">
+        <div class="doctor-details">
+            <div class="flex-shrink-0">
+               <img th:src="@{'doctorImages/'+${doctor.fileLocation}}"
+										th:onerror="this.src ='doctorImages/default.jpg'"
+										width="300px">
+            </div>
+            <div class="flex-grow-1 ms-3 doctor-info">
+                <ul class="list-group">
+                    <li class="list-group-item">Name: <span th:text="${doctor.name}"></span></li>
+                    <li class="list-group-item">Phone Number: <span th:text="${doctor.phoneNumber}"></span></li>
+                    <li class="list-group-item">Specialization: <span th:text="${doctor.specialization}"></span></li>
+                    <li class="list-group-item">Experience: <span th:text="${doctor.experience}"></span></li>
+                    <li class="list-group-item">Address: <span th:text="${doctor.location.areaName}+', '+${doctor.location.city}+', '+${doctor.location.district}+', '+${doctor.location.pincode}+', '+${doctor.location.state}"></span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Form -->
+    <div class="container-fluid">
+        <form id="doctor-registration" th:action="@{/processSchedule-form}" th:object="${schedule}" th:method="post">
+            <div class="form-group">
+                <label for="slot">Enter Schedule:</label>
+                <input type="datetime-local" id="slot" name="slot" th:field="*{slot}" required>
+                <input type="hidden" name="doctorId" th:value="${doctorId}">
+                <input type="hidden" name="patientId" th:value="${patientId}">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer shadow">
+        <footer class="page-footer shadow">
+            <div class="d-flex flex-column mx-auto py-5" style="width: 80%">
+                <div class="d-flex flex-wrap justify-content-between">
+                    <div>
+                        <a href="/Home" class="d-flex align-items-center p-0 text-dark">
+                            <img alt="logo" th:src="@{images\logo.png}" width="30px" />
+                            <span class="ms-3 h5 font-weight-bold">Easy Visit</span>
+                        </a>
+                        <p class="my-3" style="width: 250px">Experience hassle-free healthcare with our intuitive doctor appointment booking platform – where scheduling your next appointment is just a click away, putting your health at your fingertips.</p>
+                        <span class="mt-4">
+                            <button class="btn btn-dark btn-flat p-2"><i class="fa fa-facebook"></i></button>
+                            <button class="btn btn-dark btn-flat p-2"><i class="fa fa-twitter"></i></button>
+                            <button class="btn btn-dark btn-flat p-2"><i class="fa fa-instagram"></i></button>
+                        </span>
+                    </div>
+                    <div>
+                        <p class="h5 mb-4" style="font-weight: 600">Easy Visit</p>
+                        <ul class="p-0" style="list-style: none; cursor: pointer">
+                            <li class="my-2"><a class="text-dark" href="/">Resources</a></li>
+                            <li class="my-2"><a class="text-dark" href="/about">About Us</a></li>
+                            <li class="my-2"><a class="text-dark" href="/contact">Contact</a></li>
+                            <li class="my-2"><a class="text-dark" href="/">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="h5 mb-4" style="font-weight: 600">Help</p>
+                        <ul class="p-0" style="list-style: none; cursor: pointer">
+                            <li class="my-2"><a class="text-dark" href="/">Support</a></li>
+                            <li class="my-2"><a class="text-dark" href="/user-registration">Sign Up</a></li>
+                            <li class="my-2"><a class="text-dark" href="/">Sign In</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <small class="text-center mt-5">&copy; Easy Visit, 2024. All rights reserved.</small>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Sign In Modal -->
+    <div class="modal fade" id="signinModal" tabindex="-1" aria-labelledby="signinModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signinModalLabel">Sign In</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/login-process" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" placeholder="Enter your username" name="userName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="Enter your password" name="password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+package com.dsaProject.controllers;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.dsaProject.entities.Doctor;
+import com.dsaProject.entities.Patient;
+import com.dsaProject.entities.Schedule;
+import com.dsaProject.repositories.DoctorRepository;
+import com.dsaProject.repositories.PatientRepository;
+import com.dsaProject.repositories.ScheduleRepository;
+import com.dsaProject.service.AttachmentCreator;
+import com.dsaProject.service.EmailService;
+import com.itextpdf.text.DocumentException;
+
+import jakarta.servlet.http.HttpSession;
+
+
+@Controller
+public class ScheduleController {
+
+	@Value("${subject}")
+	String subject;
+	@Value("${body}")
+	String body;
+	
+	private EmailService emailService;
+	private ScheduleRepository scheduleRepository;
+	private PatientRepository patientRepository;
+	private DoctorRepository doctorRepository;
+	private AttachmentCreator attachmentCreator;
+	
+	@Autowired
+	public ScheduleController(ScheduleRepository scheduleRepository, PatientRepository patientRepository,  
+							  DoctorRepository doctorRepository, AttachmentCreator attachmentCreator, EmailService emailService) {
+		super();
+		this.scheduleRepository = scheduleRepository;
+		this.patientRepository = patientRepository;
+		this.doctorRepository = doctorRepository;
+		this.attachmentCreator = attachmentCreator;
+		this.emailService = emailService;
+	}
+	
+	@GetMapping("/schedule-register")
+	public String scheduleRegistration(Model model) {
+		Schedule schedule = new Schedule();
+		model.addAttribute("schedule", schedule);
+		return "ScheduleRegisteration";
+	}
+	
+	@GetMapping("/schedule-docotr")
+	public String scheduleDoctor(@RequestParam("doctorId")String doctorId,Model model) {
+		Schedule schedule = new Schedule();
+		model.addAttribute("schedule", schedule);
+		Optional<Doctor> doctor = doctorRepository.findById(Integer.parseInt(doctorId));
+		model.addAttribute("doctor",doctor);
+		model.addAttribute("doctorId", doctorId);
+		return "ScheduleRegisteration";
+	}
+
+	@PostMapping("processSchedule-form")
+	public String processSchedule(@ModelAttribute("Schedule")Schedule schedule, @RequestParam("doctorId")String doctorId, HttpSession session) throws Exception {
+		
+		LocalDateTime slot = schedule.getSlot();
+		Object patientId =  session.getAttribute("patientId");
+		if(patientId == null) {
+			return "redirect:/Doctors-list";
+		}
+		int retrivedDoctorId = Integer.parseInt(doctorId);
+		Optional<Patient> optionalRequiredPatient = patientRepository.findById((int)patientId);
+		Optional<Doctor>optionalRequiredDoctor = doctorRepository.findById(retrivedDoctorId);
+		
+		if(optionalRequiredPatient.isPresent() && optionalRequiredDoctor.isPresent()) {
+				
+				
+				Doctor requiredDoctor = optionalRequiredDoctor.get();
+				Patient requiredPatient = optionalRequiredPatient.get();
+				
+				List<Schedule>doctorSchedules = requiredDoctor.getSchedule();
+				List<Schedule>patientSchedules = requiredPatient.getSlotList();
+				
+				for(Schedule bookedSchedule : doctorSchedules) {
+					if(bookedSchedule.getSlot().equals(slot)) {
+						return "error";
+					}
+				}
+				
+				for(Schedule bookedSchedule : patientSchedules ) {
+					if(bookedSchedule.getSlot().equals(slot)) {
+						return "error";
+					}
+				}
+				
+				schedule.setPatient(requiredPatient);
+				schedule.setDoctor(requiredDoctor);
+				doctorSchedules.add(schedule);
+				patientSchedules.add(schedule);
+				
+				scheduleRepository.save(schedule);
+				try {
+					attachmentCreator.createAttachment();
+					final String subject2 = subject;
+					if (subject2 != null) {
+						final String body2 = body;
+						if (body2 != null) {
+							emailService.sendMail("717821y132@kce.ac.in", subject2, body2);
+						} 
+						}
+						} catch (DocumentException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			return "Home";
+		}
+			
+		return "error";
+	}
+}

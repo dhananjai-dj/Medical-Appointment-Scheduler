@@ -1,0 +1,44 @@
+package com.dsaProject.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.lang.NonNull;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import com.dsaProject.entities.Schedule;
+import com.dsaProject.repositories.UserRepositoy;
+
+import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpSession;
+
+@Service
+public class GeneralService {
+	
+	@Autowired
+	private JavaMailSender javaMailSender;
+	@Autowired
+	UserRepositoy userRepositoy;
+	@Autowired
+	HttpSession session;
+	
+	public void sendMail(@NonNull String toMail, @NonNull String subject, @NonNull String body, @NonNull Schedule schedule)throws Exception {
+		
+		
+		MimeMessage message = javaMailSender.createMimeMessage();
+		MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message, true);
+		String fileCopyName = schedule.getScheduleId()+".pdf";
+		mimeMessageHelper.addTo(toMail);
+		mimeMessageHelper.setSubject(subject);
+		mimeMessageHelper.setText(body);
+		FileSystemResource fileSystemResource = new FileSystemResource("src/main/resources/static/AcknowledgementFiles/"+fileCopyName);
+		mimeMessageHelper.addAttachment(fileSystemResource.getFilename(),fileSystemResource );
+		
+		javaMailSender.send(message);
+		
+	}
+	
+	
+	
+}

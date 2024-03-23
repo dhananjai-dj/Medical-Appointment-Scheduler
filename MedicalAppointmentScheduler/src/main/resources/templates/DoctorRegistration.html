@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctor Registration Form</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<style>
+.floating-card {
+	margin: 20px;
+	border-radius: 15px;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+body {
+	background: rgb(2, 0, 36);
+	background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%,
+		rgba(65, 65, 227, 1) 35%, rgba(0, 212, 255, 1) 100%);
+}
+
+.header {
+	border-radius: 20px;
+	margin-top: 20px;
+}
+
+.myNav {
+	margin-top: 20px;
+	border-radius: 20px;
+}
+
+.btn-primary:hover {
+	background-color: #0056b3;
+	border-color: #0056b3;
+}
+
+/* Customize the navigation bar */
+.navbar {
+	background-color: #343a40;
+	color: #ffffff;
+	border-radius: 20px;
+	margin-bottom: 20px;
+}
+
+.navbar-brand {
+	color: #ffffff;
+}
+
+.navbar-nav .nav-link {
+	color: #ffffff;
+}
+
+.navbar-nav .nav-link:hover {
+	color: #ffffff;
+}
+
+.footer {
+	margin-top: 20px;
+	border-radius: 20px;
+}
+</style>
+</head>
+
+<body>
+
+	<div class="container">
+	<div class="header">
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+				<div class="container-fluid">
+					<a class="navbar-brand" href="/Doctors-list"> <img
+						th:src="@{images\logo.png}" alt="Logo" width="30" height="24"
+						class="d-inline-block align-text-top"> Easy Visit
+					</a>
+					<div class="collapse navbar-collapse" id="navbarNav">
+						<ul class="navbar-nav ms-auto">
+							<li class="nav-item">
+								<form action="/Home" class="nav-link">
+									<button type="submit" class="btn btn-primary">Home</button>
+								</form>
+							</li>
+							<li class="nav-item">
+								<form action="/MyProfile" class="nav-link">
+									<button type="submit" class="btn btn-primary">My Profile</button>
+								</form>
+							</li>
+							<li class="nav-item">
+								<form action="/logout" class="nav-link">
+									<button type="submit" class="btn btn-primary">Sign Out</button>
+								</form>
+							</li>
+	
+							
+							<li class="nav-item">
+								<form action="/about" class="nav-link">
+									<button type="submit" class="btn btn-primary">About</button>
+								</form>
+							</li>
+							<li class="nav-item">
+								<form action="/contact" class="nav-link">
+									<button type="submit" class="btn btn-primary">Contact</button>
+								</form>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</div>
+		<div class="container body" style="margin: 10px; padding: 20px;">
+			<div></div>
+			<div class="text-center h1">
+				<span class="shadow"
+					style="border-radius: 10px; padding: 5px; color: white;">
+					Doctor </span> <br> <br>
+			</div>
+			<div class="card floating-card" style="padding: 20px;" id="card">
+				<form id="doctor-registration" th:action="@{/processDoctor-form}"
+					th:object="${doctor}" th:method="post"  enctype="multipart/form-data">
+					<div class="container-fluid">
+
+						<div class="mb-3">
+							<label for="name" class="form-label h5">Enter your Name
+								Doctor</label> <input type="text" placeholder="Your Name" name="name"
+								id="name" class="form-control" data-clear-btn="true"
+								th:field="*{name}" autocomplete=off>
+						</div>
+						 <div class="mb-3">
+                            <label for="image" class="form-label h5">Select your image</label>
+                            <input type="file" name="image" id="image" class="form-control" accept="image/*" required>
+                        </div>
+											
+						<div class="mb-3">
+							<label for="phoneNumber" class="form-label h5">Enter your
+								phone Number</label> <input placeholder="Your Phone Number"
+								name="phoneNumber" id="phoneNumber" class="form-control"
+								data-clear-btn="true" type="text" th:field="*{phoneNumber}"
+								autocomplete=off>
+						</div>
+
+						<div class="mb-3">
+							<label for="experience" class="form-label h5">Enter your
+								Experience</label> <input name="experience" id="experience"
+								class="form-control" data-clear-btn="true" type="number"
+								th:field="*{experience}" autocomplete=off />
+						</div>
+
+						<div class="form-group">
+							<label for="specialization">Enter your Specialization:</label> 
+							<select class ="form-select" th:field="*{specialization}">							
+								<option th:each="specialization : ${specializations}"
+									th:value="${specialization}" th:text="${specialization}" />
+							</select>
+						</div>
+
+
+						<div class="mb-3">
+							<label for="hospitalName" class="form-label h5">Enter the
+								Hospital/Clinic Name</label> <input type="text" name="hospitalName"
+								id="hospitalName" class="form-control" data-clear-btn="true"
+								th:field="*{hospitalName}" autocomplete=off
+								placeholder="Hospital/Clinic Name">
+						</div>
+
+						<div class="mb-3">
+							<label for="Address" class="form-label h5">Enter your
+								Hospital/Clinic Location</label>
+							<div class="card" style="padding: 20px;" id="card">
+
+								<div class="row">
+									<div class="col-md-6">
+										<div class="addressGroup">
+											<label for="areaName" class="form-label h6">Enter the
+												area Name</label>
+											<div class="input-group mb-3">
+												<input name="areaName" id="areaName" class="form-control"
+													data-clear-btn="true" type="text"
+													th:field="*{location.areaName}" autocomplete=off
+													placeholder="Area Name">
+											</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<div class="addressGroup">
+											<label for="city" class="form-label h6">Enter the
+												City</label>
+											<div class="input-group mb-3">
+												<input name="city" id="city" class="form-control"
+													data-clear-btn="true" type="text"
+													th:field="*{location.city}" autocomplete=off
+													placeholder="City">
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-md-6">
+										<div class="addressGroup">
+											<label for="district" class="form-label h6">Enter the
+												District</label>
+											<div class="input-group mb-3">
+												<input name="district" id="district" class="form-control"
+													data-clear-btn="true" type="text"
+													th:field="*{location.district}" autocomplete=off
+													placeholder="District">
+											</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<div class="addressGroup">
+											<label for="state" class="form-label h6">Enter the
+												State</label>
+											<div class="input-group mb-3">
+												<input name="state" id="state" class="form-control"
+													data-clear-btn="true" type="text"
+													th:field="*{location.state}" autocomplete=off
+													placeholder="State">
+
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-md-6">
+										<div class="addressGroup">
+											<label for="pincode" class="form-label h6">Enter the
+												Pincode</label>
+											<div class="input-group mb-3">
+												<input name="pincode" id="pincode" class="form-control"
+													data-clear-btn="true" type="text"
+													th:field="*{location.pincode}" placeholder="Pincode"
+													autocomplete=off />
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="d-flex justify-content-center">
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="footer shadow">
+			<footer class="page-footer shadow">
+				<div class="d-flex flex-column mx-auto py-5" style="width: 80%">
+					<div class="d-flex flex-wrap justify-content-between">
+						<div>
+							<a href="/Home"
+								class="d-flex align-items-center p-0 text-dark"> <img
+								alt="logo" th:src="@{images\logo.png}" width="30px" /> <span
+								class="ms-3 h5 font-weight-bold">Easy Visit</span>
+							</a>
+							<p class="my-3" style="width: 250px">Experience hassle-free
+								healthcare with our intuitive doctor appointment booking
+								platform – where scheduling your next appointment is just a
+								click away, putting your health at your fingertips.</p>
+							<span class="mt-4">
+								<button class="btn btn-dark btn-flat p-2">
+									<i class="fa fa-facebook"></i>
+								</button>
+								<button class="btn btn-dark btn-flat p-2">
+									<i class="fa fa-twitter"></i>
+								</button>
+								<button class="btn btn-dark btn-flat p-2">
+									<i class="fa fa-instagram"></i>
+								</button>
+							</span>
+						</div>
+						<div>
+							<p class="h5 mb-4" style="font-weight: 600">Easy Vist</p>
+							<ul class="p-0" style="list-style: none; cursor: pointer">
+								<li class="my-2"><a class="text-dark" href="/">Resources</a></li>
+								<li class="my-2"><a class="text-dark" href="/about">About
+										Us</a></li>
+								<li class="my-2"><a class="text-dark" href="/contact">Contact</a></li>
+								<li class="my-2"><a class="text-dark" href="/">Blog</a></li>
+							</ul>
+						</div>
+						<div>
+							<p class="h5 mb-4" style="font-weight: 600">Help</p>
+							<ul class="p-0" style="list-style: none; cursor: pointer">
+								<li class="my-2"><a class="text-dark" href="/">Support</a></li>
+								<li class="my-2"><a class="text-dark"
+									href="/user-registration">Sign Up</a></li>
+								<li class="my-2"><a class="text-dark" href="/">Sign In</a></li>
+							</ul>
+						</div>
+					</div>
+					<small class="text-center mt-5">&copy; Easy Visit, 2024.
+						All rights reserved.</small>
+				</div>
+			</footer>
+		</div>
+	</div>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

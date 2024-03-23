@@ -1,0 +1,19 @@
+package com.dsaProject.service;
+
+import org.springframework.ui.Model;
+
+import com.dsaProject.entities.Doctor;
+import com.dsaProject.entities.Schedule;
+import com.dsaProject.repositories.DoctorRepository;
+
+public class ScheduleService {
+
+	public void scheduleRegistrationService(Model model, String doctorId, String patientId, DoctorRepository doctorRepository) {
+		Schedule schedule = new Schedule();
+		model.addAttribute("schedule", schedule);
+		Doctor doctor = doctorRepository.findById(Integer.parseInt(doctorId)).orElse(null);
+		model.addAttribute("doctor",doctor);
+		model.addAttribute("patientId", patientId);
+	}
+
+}

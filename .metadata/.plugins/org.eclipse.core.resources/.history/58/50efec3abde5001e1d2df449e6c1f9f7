@@ -1,0 +1,14 @@
+package com.dsaProject.service;
+
+import org.springframework.ui.Model;
+
+import com.dsaProject.entities.User;
+
+public class UserService {
+
+	public void createModel(Model model) {
+		User user = new User();
+		model.addAttribute("user", user);
+	}
+
+}

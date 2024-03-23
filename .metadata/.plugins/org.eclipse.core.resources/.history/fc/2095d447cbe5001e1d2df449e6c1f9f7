@@ -1,0 +1,13 @@
+package com.dsaProject.controllers;
+
+import org.springframework.web.bind.annotation.Mapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class TestRestController {
+
+	@M
+	public String main() {
+		return "n";
+	}
+}

@@ -1,0 +1,15 @@
+package com.dsaProject.service;
+
+import org.springframework.ui.Model;
+
+import com.dsaProject.entities.Patient;
+
+public class PatientService {
+
+	public void createModel(Model model, String doctorId) {
+		Patient patient = new Patient();
+		model.addAttribute("patient", patient);
+		model.addAttribute("doctorId", doctorId);
+	}
+
+}

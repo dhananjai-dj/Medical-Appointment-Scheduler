@@ -1,0 +1,81 @@
+package com.dsaProject.controllers;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.dsaProject.entities.Patient;
+import com.dsaProject.entities.User;
+import com.dsaProject.repositories.UserRepositoy;
+import com.dsaProject.service.GeneralService;
+
+import jakarta.servlet.http.HttpSession;
+
+@Controller
+public class GeneralController {
+	
+	@Autowired
+	JavaMailSender javaMailSender;
+	@Autowired
+	UserRepositoy userRepositoy;
+	@Autowired
+	HttpSession session;
+	@Autowired
+	GeneralService generalService;
+	
+	@RequestMapping("/about")
+	public String goAbout() {
+		return "About";
+	}
+	
+	@RequestMapping("/contact")
+	public String goContact() {
+		return "ContactUs";
+	}
+	
+	//This is not yet completed
+	@GetMapping("/sendMail")
+	public String sendMail(@RequestParam String message, @RequestParam String emailId) {
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setFrom(emailId);
+		mailMessage.setTo();
+		mailMessage.setText(message);
+		return "Home";
+	}
+	
+	@RequestMapping("/login-process")
+	public String loginProcess(@RequestParam String userName, @RequestParam String password) {
+		if(userName == null || password == null)
+			return "Login";
+		Optional<User> user = userRepositoy.findByUserNamePassword(userName, password);
+		if(user==null) {
+			return "Error";
+		}
+		User validUser = user.get();
+		session.setAttribute("userId", validUser.getUserId());
+		session.setMaxInactiveInterval(120);
+		return "Home";
+	}
+	
+	@RequestMapping("/MyProfile")
+	public String profileView(Model model) {
+		Integer userId = (Integer)session.getAttribute("userId");
+		if(userId == null) {
+			return "redirect:/login-process";
+		}
+		Optional<User> user = userRepositoy.findById(userId);
+		User retrivedUser = user.get();
+		model.addAttribute("user", retrivedUser);
+		List<Patient> retrivedPatient = retrivedUser.getPatient();
+		model.addAttribute("patientList",retrivedPatient);
+		return "MyProfile";
+	}
+	}

@@ -1,0 +1,134 @@
+package com.dsaProject.controllers;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.dsaProject.entities.Doctor;
+import com.dsaProject.entities.Patient;
+import com.dsaProject.entities.Schedule;
+import com.dsaProject.repositories.DoctorRepository;
+import com.dsaProject.repositories.PatientRepository;
+import com.dsaProject.repositories.ScheduleRepository;
+import com.dsaProject.service.AttachmentCreator;
+import com.dsaProject.service.GeneralService;
+import com.dsaProject.service.ScheduleService;
+import com.itextpdf.text.DocumentException;
+
+
+
+@Controller
+public class ScheduleController {
+
+	@Value("${subject}")
+	String subject;
+	@Value("${body}")
+	String body;
+	
+	private GeneralService emailService;
+	private ScheduleRepository scheduleRepository;
+	private PatientRepository patientRepository;
+	private DoctorRepository doctorRepository;
+	private AttachmentCreator attachmentCreator;
+	private ScheduleService scheduleService; 
+	
+	@Autowired
+	public ScheduleController(ScheduleRepository scheduleRepository, PatientRepository patientRepository,  
+							  DoctorRepository doctorRepository, AttachmentCreator attachmentCreator, GeneralService emailService, ScheduleService scheduleService) {
+		super();
+		this.scheduleRepository = scheduleRepository;
+		this.patientRepository = patientRepository;
+		this.doctorRepository = doctorRepository;
+		this.attachmentCreator = attachmentCreator;
+		this.emailService = emailService;
+		this.scheduleService = scheduleService;
+	}
+	
+	@GetMapping("/schedule-register/{doctorId}/{patientId}")
+	public String scheduleRegistration(Model model, @PathVariable("doctorId") String doctorId, @PathVariable("patientId") String patientId) {
+		Schedule schedule = new Schedule();
+		model.addAttribute("schedule", schedule);
+		Doctor doctor = doctorRepository.findById(Integer.parseInt(doctorId)).orElse(null);
+		model.addAttribute("doctor",doctor);
+		model.addAttribute("patientId", patientId);
+		return "ScheduleRegisteration";
+	}
+	
+	@GetMapping("/schedule-doctor")
+	public String scheduleDoctor(Model model,@RequestParam("doctorId")String doctorId) {
+		Schedule schedule = new Schedule();
+		model.addAttribute("schedule", schedule);
+		model.addAttribute("doctorId", doctorId);
+		return "ScheduleRegisteration";
+	}
+
+	@SuppressWarnings("null")
+	@PostMapping("processSchedule-form")
+	public String processSchedule(@ModelAttribute("Schedule")Schedule schedule, @RequestParam("doctorId")String doctorId, @RequestParam("patientId") String patientId) throws Exception {
+		
+		LocalDateTime slot = schedule.getSlot();
+		if(patientId == null) {
+			return "redirect:/Login";
+		}
+		int retrivedDoctorId = Integer.parseInt(doctorId);
+		Optional<Patient> optionalRequiredPatient = patientRepository.findById(Integer.parseInt(patientId));
+		Optional<Doctor>optionalRequiredDoctor = doctorRepository.findById(retrivedDoctorId);
+		
+		if(optionalRequiredPatient.isPresent() && optionalRequiredDoctor.isPresent()) {
+				
+				
+				Doctor requiredDoctor = optionalRequiredDoctor.get();
+				Patient requiredPatient = optionalRequiredPatient.get();
+				
+				List<Schedule>doctorSchedules = requiredDoctor.getSchedule();
+				List<Schedule>patientSchedules = requiredPatient.getSlotList();
+				
+				for(Schedule bookedSchedule : doctorSchedules) {
+					if(bookedSchedule.getSlot().equals(slot)) {
+						throw new Exception("Doctor not available");
+					}
+				}
+				
+				for(Schedule bookedSchedule : patientSchedules ) {
+					if(bookedSchedule.getSlot().equals(slot)) {
+						throw new Exception("You have already Booked on this schedule");
+					}
+				}
+				
+				schedule.setPatient(requiredPatient);
+				schedule.setDoctor(requiredDoctor);
+				doctorSchedules.add(schedule);
+				patientSchedules.add(schedule);
+				
+				scheduleRepository.save(schedule);
+				try {
+					attachmentCreator.createAttachment(requiredDoctor, requiredPatient, schedule);
+					final String subject2 = subject;
+					if (subject2 != null) {
+						final String body2 = body;
+						if (body2 != null && requiredPatient.getEmailAddress()!=null) {
+							emailService.sendMail(requiredPatient.getEmailAddress(), subject2, body2, schedule);
+						} 
+						}
+						} catch (DocumentException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				 return "redirect:/Home";
+		}
+			
+		return "error";
+	}
+}
